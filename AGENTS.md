@@ -1,47 +1,107 @@
 # Project Agent Instructions
 
-Python environment:
+## Environment
 
-- Always use the backend Poetry virtualenv (`backend-py3.10`) for Python commands.
-- Preferred invocation: `cd backend && poetry run <command>`.
-- If you need to activate directly, use Poetry to discover it in the current environment:
-  - `cd backend && poetry env activate` (then run the `source .../bin/activate` command it prints)
+Target: MX Linux 25 (Debian 13 / bookworm base).
 
-Testing policy:
+### 1. System packages
 
-- Always run backend tests after every code change: `cd backend && poetry run pytest`.
-- Always run type checking after every code change: `cd backend && poetry run pyright`.
-- Type checking policy: no new warnings in changed files (`pyright`).
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip \
+    nodejs npm cargo \
+    libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
+    libcups2 libdrm2 libxkbcommon0 libxcomposite1 \
+    libxdamage1 libxfixes3 libxrandr2 libgbm1 \
+    libpango-1.0-0 libcairo2 libasound2
+```
 
-## Frontend
+### 2. Install Poetry (Python)
 
-- Frontend: `cd frontend && pnpm lint`
+```bash
+pip install --user poetry
+# or: pip install poetry
+```
 
-If changes touch both, run both sets.
+Poetry lands in `~/.local/bin/poetry`. Add it to PATH if missing:
+`export PATH="$HOME/.local/bin:$PATH"` (put that in `~/.bashrc`).
+
+### 3. Install pnpm (Node)
+
+```bash
+npm install -g pnpm
+```
+
+### 4. Install backend dependencies
+
+```bash
+cd backend
+poetry install
+```
+
+> Python 3.12 is what Poetry resolves to (`backend-...-py3.12`); `pyproject.toml`
+> pins `^3.10`, which 3.12 satisfies. Just use `poetry run`.
+
+### 5. Playwright Chromium (optional, for "Screenshot preview")
+
+```bash
+poetry run playwright install --with-deps chromium
+```
+
+### 6. API keys
+
+Set at least one LLM key. This fork uses NVIDIA NIM by default — edit
+`backend/.env` (restart the backend after editing):
+
+```
+OPENAI_BASE_URL=https://integrate.api.nvidia.com/v1
+OPENAI_API_KEY=nvapi-your-key-here
+```
+
+You can also paste keys into the in-app Settings dialog (gear icon).
+
+## Running
+
+```bash
+# Backend (from backend/)
+poetry run uvicorn main:app --reload --port 7001
+
+# Frontend (from frontend/) — open http://localhost:5173
+pnpm dev
+```
+
+The Vite dev server binds to `localhost` only — use `http://localhost:5173`,
+not `http://127.0.0.1:5173`.
+
+## Testing & type checking
+
+```bash
+cd backend && poetry run pytest
+cd backend && poetry run pyright
+cd frontend && pnpm lint
+```
+
+Type checking policy: no new warnings in changed files (`pyright`).
+`cd frontend && pnpm lint` reports pre-existing errors (e.g.
+`@typescript-eslint/no-explicit-any` in `generateCode.ts`) because lint runs
+with `--max-warnings 0`; those are baseline, not environment issues.
 
 ## Prompt formatting
 
 - Prefer triple-quoted strings (`"""..."""`) for multi-line prompt text.
-- For interpolated multi-line prompts, prefer a single triple-quoted f-string over concatenated string fragments.
+- For interpolated multi-line prompts, prefer a single triple-quoted f-string
+  over concatenated string fragments.
 
-# Hosted
+## Hosted
 
-The hosted version is on the `hosted` branch. The `hosted` branch connects to a saas backend, which is a seperate codebase at ../screenshot-to-code-saas
+The hosted version is on the `hosted` branch. The `hosted` branch connects to
+a saas backend, which is a separate codebase at ../screenshot-to-code-saas
 
 ## Cursor Cloud specific instructions
 
-Dependencies are refreshed automatically on startup (`poetry install` in `backend/`, `pnpm install` in `frontend/`); no manual install is needed.
-Cursor Cloud environment setup should run `bash /agent/repos/screenshot-to-code/scripts/cursor-cloud-install.sh`; the script changes to the repo root before installing so it works regardless of the startup working directory.
-
-Services (see `README.md` for the canonical commands):
-- Backend (FastAPI + WebSocket): from `backend/`, `poetry run uvicorn main:app --reload --port 7001`.
-- Frontend (Vite/React): from `frontend/`, `pnpm dev` → open `http://localhost:5173`. The Vite dev server binds to `localhost` only, so use `http://localhost:5173`, not `http://127.0.0.1:5173` (the latter refuses the connection).
-- Frontend talks to the backend over a WebSocket (`VITE_WS_BACKEND_URL`, default `ws://127.0.0.1:7001`); generation streams over that socket, other routes are plain HTTP.
-
-Non-obvious caveats:
-- `poetry` is installed under `~/.local/bin` and is on PATH for interactive shells (`.bashrc`) but not necessarily for non-interactive scripts; use the full path `~/.local/bin/poetry` if `poetry` is not found.
-- The Poetry virtualenv resolves to Python 3.12 (named like `backend-...-py3.12`), not 3.10 — `pyproject.toml` pins `^3.10`, which 3.12 satisfies. Just use `poetry run`.
-- Core feature (screenshot → code) requires at least one LLM key: set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` in `backend/.env` (restart backend after editing) or in the in-app Settings dialog. Without a key, generation fails fast with a "No OpenAI, Anthropic, or Gemini API key" message. `REPLICATE_API_KEY` (image gen/edit) only works via `backend/.env`, not the UI.
-- Playwright Chromium is pre-installed for the optional "Screenshot preview" tool; Settings shows it as "Available".
-- `pnpm install` prints an "Ignored build scripts (esbuild, puppeteer)" warning — this is harmless; Vite build/dev and tests work without approving builds.
-- `cd frontend && pnpm lint` currently reports pre-existing errors (e.g. `@typescript-eslint/no-explicit-any` in `generateCode.ts`) because lint runs with `--max-warnings 0`; these are baseline issues, not environment problems.
+Dependencies are refreshed automatically on startup (`poetry install` in
+`backend/`, `pnpm install` in `frontend/`); no manual install is needed.
+Cursor Cloud environment setup should run
+`bash /agent/repos/screenshot-to-code/scripts/cursor-cloud-install.sh`;
+the script changes to the repo root before installing so it works regardless
+of the startup working directory.
