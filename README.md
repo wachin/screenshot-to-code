@@ -92,6 +92,48 @@ Open http://localhost:5173 to use the app.
 
 If you prefer to run the backend on a different port, update `VITE_WS_BACKEND_URL` in `frontend/.env.local`.
 
+## Using a custom OpenAI-compatible API (NVIDIA NIM, local proxies, etc.)
+
+This fork lets you route code generation through any OpenAI-compatible
+endpoint by setting `OPENAI_BASE_URL`. The backend uses the OpenAI Python
+client pointed at that URL, so services like [NVIDIA NIM](https://build.nvidia.com/)
+(`https://integrate.api.nvidia.com/v1`), LM Studio, Ollama, or any proxy work.
+
+### NVIDIA NIM example
+
+1. Get a key at https://build.nvidia.com/ and set it in `backend/.env`:
+
+   ```bash
+   cd backend
+   echo "OPENAI_BASE_URL=https://integrate.api.nvidia.com/v1" > .env
+   echo "OPENAI_API_KEY=nvapi-your-key-here" >> .env
+   ```
+
+   (You can also paste the key into the settings dialog in the frontend — the
+   gear icon after loading the app.)
+
+2. Start the backend:
+
+   ```bash
+   poetry run uvicorn main:app --reload --port 7001
+   ```
+
+3. Open the frontend at http://localhost:5173 and take a screenshot.
+
+The model used is `deepseek-ai/deepseek-v4.1-flash` (NVIDIA). It supports
+text + image input, so screenshot-to-code works. Tools that call other
+providers (`extract_assets` → Gemini, `edit_images`/`remove_backgrounds` →
+Replicate) are only available when those keys are set.
+
+### Notes
+
+- The backend picks models automatically based on which keys you have. With
+  only an NVIDIA key it uses `deepseek-ai/deepseek-v4.1-flash`.
+- If your endpoint returns a pricing response, cost tracking works; otherwise
+  the variant is treated as unpriced (no spend ceiling).
+- Some endpoints reject the `reasoning` parameter; the NVIDIA provider in this
+  fork omits it.
+
 ## Docker
 
 If you have Docker installed, run this from the root directory:
