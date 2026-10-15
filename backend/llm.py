@@ -28,6 +28,7 @@ class Llm(Enum):
     GPT_6_1_SOL_HIGH = "gpt-6.1-sol (high thinking)"
     GPT_6_1_SOL_XHIGH = "gpt-6.1-sol (xhigh thinking)"
     GPT_6_1_SOL_MAX = "gpt-6.1-sol (max thinking)"
+    NVIDIA_DEEPSEEK_V4_1_FLASH = "deepseek-ai/deepseek-v4.1-flash"
     # Claude
     CLAUDE_SONNET_4_6 = "claude-sonnet-4-6"
     CLAUDE_OPUS_5_5_LOW = "claude-opus-5-5 (low effort)"
@@ -99,6 +100,7 @@ MODEL_PROVIDER: dict[Llm, str] = {
     Llm.GPT_6_1_SOL_HIGH: "openai",
     Llm.GPT_6_1_SOL_XHIGH: "openai",
     Llm.GPT_6_1_SOL_MAX: "openai",
+    Llm.NVIDIA_DEEPSEEK_V4_1_FLASH: "nvidia",
     # Anthropic models
     Llm.CLAUDE_SONNET_4_6: "anthropic",
     Llm.CLAUDE_OPUS_5_5_LOW: "anthropic",
@@ -139,8 +141,9 @@ MODEL_PROVIDER: dict[Llm, str] = {
 
 # Convenience sets for membership checks
 OPENAI_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "openai"}
-ANTHROPIC_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "anthropic"}
-GEMINI_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "gemini"}
+    ANTHROPIC_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "anthropic"}
+    GEMINI_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "gemini"}
+    NVIDIA_MODELS = {m for m, p in MODEL_PROVIDER.items() if p == "nvidia"}
 
 OPENAI_MODEL_CONFIG: dict[Llm, dict[str, str]] = {
     Llm.GPT_5_4_MINI_LOW: {"api_name": "gpt-5.4-mini", "reasoning_effort": "low"},
@@ -182,6 +185,9 @@ OPENAI_MODEL_CONFIG: dict[Llm, dict[str, str]] = {
     Llm.GPT_6_1_SOL_HIGH: {"api_name": "gpt-6.1-sol", "reasoning_effort": "high"},
     Llm.GPT_6_1_SOL_XHIGH: {"api_name": "gpt-6.1-sol", "reasoning_effort": "xhigh"},
     Llm.GPT_6_1_SOL_MAX: {"api_name": "gpt-6.1-sol", "reasoning_effort": "max"},
+    Llm.NVIDIA_DEEPSEEK_V4_1_FLASH: {
+        "api_name": "deepseek-ai/deepseek-v4.1-flash",
+    },
 }
 
 

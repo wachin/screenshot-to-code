@@ -35,6 +35,7 @@ export enum CodeGenerationModel {
   GPT_6_1_SOL_MAX = "gpt-6.1-sol (max thinking)",
   GPT_5_5_XHIGH = "gpt-5.5 (xhigh thinking)",
   GPT_5_4_MINI_LOW = "gpt-5.4-mini (low thinking)",
+  NVIDIA_DEEPSEEK_V4_1_FLASH = "deepseek-ai/deepseek-v4.1-flash",
   GEMINI_3_FLASH_PREVIEW_HIGH = "gemini-3-flash-preview (high thinking)",
   GEMINI_3_FLASH_PREVIEW_MINIMAL = "gemini-3-flash-preview (minimal thinking)",
   GEMINI_3_1_PRO_PREVIEW_HIGH = "gemini-3.1-pro-preview (high thinking)",
@@ -139,6 +140,9 @@ export const CODE_GENERATION_MODEL_DESCRIPTIONS: {
   },
   "gpt-5.4-mini (low thinking)": {
     name: "GPT 5.4 Mini (low)",
+  },
+  "deepseek-ai/deepseek-v4.1-flash": {
+    name: "DeepSeek V4.1 Flash (NVIDIA)",
   },
   "claude-opus-5-5 (low effort)": {
     name: "Claude Opus 5.5 (low)",
